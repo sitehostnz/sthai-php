@@ -7,6 +7,7 @@ namespace SthAI;
 use SthAI\Exception\HttpException;
 use SthAI\Exception\InvalidArgumentException;
 use SthAI\Exception\ResponseParseException;
+use SthAI\Internal\Template;
 use SthAI\Model\EmbeddingModel;
 use SthAI\Model\EmbeddingParams;
 use SthAI\Model\InferenceModel;
@@ -418,6 +419,89 @@ final class Client
         }
 
         return self::floatEmbedding($outputs[0]);
+    }
+
+    /**
+     * Embed a batch of texts in one request, returning one vector per text
+     * in the same order. Text-only; use embed() for multimodal input.
+     *
+     * Only the plain-input request form batches, and it bypasses the
+     * server-side chat template, so each text is rendered through a local
+     * template first; with the built-in templates the results match calling
+     * embed() per text. template and instruction default from
+     * EmbeddingParams (the query instruction when query=true, as with
+     * embed()). For models without known params, pass a template using
+     * {instruction} and {text} placeholders - "{text}" alone for raw
+     * untemplated input. dimensions truncates the vectors server-side.
+     *
+     * @param string[] $texts
+     *
+     * @return array<int, array<int, float|int>> one vector per text, in input order
+     */
+    public function batchEmbed(
+        array $texts,
+        string $model = EmbeddingModel::QWEN_3_VL_8B,
+        bool $query = false,
+        ?string $instruction = null,
+        ?string $template = null,
+        ?int $dimensions = null
+    ): array {
+        if ($texts === []) {
+            throw new InvalidArgumentException('batchEmbed() requires at least one text');
+        }
+        foreach ($texts as $text) {
+            if ($text === '') {
+                throw new InvalidArgumentException('batchEmbed() texts must be non-empty strings');
+            }
+        }
+        if ($template === null) {
+            $params = EmbeddingParams::forModel($model);
+            $template = $params !== null ? $params->getTemplate() : null;
+            if ($template === null) {
+                throw new InvalidArgumentException(sprintf(
+                    "no known embedding template for model '%s'; pass template "
+                    . '(use "{text}" for models that take raw untemplated input)',
+                    $model
+                ));
+            }
+        }
+        if (!Template::hasPlaceholder($template, 'instruction') && ($instruction !== null || $query)) {
+            trigger_error(
+                'the template has no {instruction} placeholder, so the requested '
+                . 'instruction steering will not be applied',
+                E_USER_WARNING
+            );
+        }
+        if ($instruction === null) {
+            $instruction = self::defaultInstruction($model, $query);
+            if ($instruction === null && Template::hasPlaceholder($template, 'instruction')) {
+                throw new InvalidArgumentException(sprintf(
+                    "no known embedding instruction for model '%s' but the "
+                    . 'template expects one; pass instruction',
+                    $model
+                ));
+            }
+        }
+        self::checkDimensions($model, $dimensions);
+
+        $inputs = [];
+        foreach ($texts as $text) {
+            $inputs[] = Template::render($template, $instruction, $text);
+        }
+
+        $decoded = $this->embeddingRequest([
+            'input' => $inputs,
+            'model' => $model,
+            'encoding_format' => 'float',
+            'dimensions' => $dimensions,
+        ]);
+
+        $vectors = [];
+        foreach ($decoded->output() as $embedding) {
+            $vectors[] = self::floatEmbedding($embedding);
+        }
+
+        return $vectors;
     }
 
     /**
