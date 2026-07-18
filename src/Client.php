@@ -7,7 +7,10 @@ namespace SthAI;
 use SthAI\Exception\HttpException;
 use SthAI\Exception\InvalidArgumentException;
 use SthAI\Exception\ResponseParseException;
+use SthAI\Model\EmbeddingModel;
+use SthAI\Model\EmbeddingParams;
 use SthAI\Model\InferenceModel;
+use SthAI\Response\EmbeddingResponse;
 use SthAI\Response\InferenceResponse;
 use SthAI\Response\ModelCard;
 use SthAI\Transport\CurlTransport;
@@ -342,6 +345,161 @@ final class Client
         }
 
         return $decoded;
+    }
+
+    /**
+     * Embed a single input (text, images, or both) and return its vector.
+     *
+     * The instruction-trained model is steered by a default instruction
+     * from EmbeddingParams: the model's document instruction, or its query
+     * instruction when query=true (use this when embedding search
+     * queries). Passing instruction overrides either.
+     *
+     * Each call produces exactly ONE vector - multimodal content rolls into
+     * it; use batchEmbed() to embed many texts in one request. dimensions
+     * truncates the vector server-side (Matryoshka); powers of two work
+     * best, up to the model's native dimension.
+     *
+     * @param string[] $imageUrls  image URLs (or data URIs, e.g. from Image::dataUriFromBytes())
+     * @param string[] $imageFiles paths of local image files, inlined as data URIs
+     *
+     * @return array<int, float|int> the embedding vector
+     */
+    public function embed(
+        ?string $text = null,
+        string $model = EmbeddingModel::QWEN_3_VL_8B,
+        bool $query = false,
+        ?string $instruction = null,
+        array $imageUrls = [],
+        array $imageFiles = [],
+        ?int $dimensions = null
+    ): array {
+        $imageParts = self::buildImageParts($imageUrls, $imageFiles);
+        $parts = [];
+        // An empty string is treated as no text: embedding it would produce
+        // a meaningless vector, so it falls through to the guard below
+        $hasText = $text !== null && $text !== '';
+        if ($hasText) {
+            $parts[] = ['type' => 'text', 'text' => $text];
+        }
+        $parts = array_merge($parts, $imageParts);
+        if ($parts === []) {
+            throw new InvalidArgumentException('embed() requires text and/or images');
+        }
+        self::checkDimensions($model, $dimensions);
+        $content = ($hasText && $imageParts === []) ? $text : $parts;
+
+        if ($instruction === null) {
+            $instruction = self::defaultInstruction($model, $query);
+        }
+        $messages = [];
+        if ($instruction !== null) {
+            $messages[] = ['role' => 'system', 'content' => $instruction];
+        }
+        $messages[] = ['role' => 'user', 'content' => $content];
+        // The open assistant turn is intentional: with continue_final_message
+        // the template is left unterminated, matching how the model was
+        // trained to embed
+        $messages[] = ['role' => 'assistant', 'content' => ''];
+
+        $decoded = $this->embeddingRequest([
+            'messages' => $messages,
+            'model' => $model,
+            'encoding_format' => 'float',
+            'dimensions' => $dimensions,
+            'continue_final_message' => true,
+            // true (not the chat-form server default of false) so tokenization
+            // matches batchEmbed's plain-input form, which defaults to true
+            'add_special_tokens' => true,
+        ]);
+        $outputs = $decoded->output();
+        if ($outputs === []) {
+            throw new ResponseParseException('server returned no embedding data');
+        }
+
+        return self::floatEmbedding($outputs[0]);
+    }
+
+    /**
+     * POST an embedding request and decode the response.
+     *
+     * @param array<string, mixed> $body
+     */
+    private function embeddingRequest(array $body): EmbeddingResponse
+    {
+        return EmbeddingResponse::fromArray(
+            $this->requestJson('POST', self::EMBEDDING_ENDPOINT, $body)
+        );
+    }
+
+    /**
+     * The model's recommended embedding instruction, if known: its query
+     * instruction when query is set, its document instruction otherwise.
+     */
+    private static function defaultInstruction(string $model, bool $query): ?string
+    {
+        $params = EmbeddingParams::forModel($model);
+        if ($params === null) {
+            return null;
+        }
+
+        return $params->getInstruction($query);
+    }
+
+    /**
+     * Warn when a requested Matryoshka truncation exceeds or does not
+     * divide evenly into the model's native output dimension (when both
+     * are known).
+     */
+    private static function checkDimensions(string $model, ?int $dimensions): void
+    {
+        if ($dimensions === null) {
+            return;
+        }
+        if ($dimensions < 1) {
+            throw new InvalidArgumentException('dimensions must be a positive integer');
+        }
+        $params = EmbeddingParams::forModel($model);
+        if ($params === null || $params->getDimensions() === null) {
+            return;
+        }
+        $native = $params->getDimensions();
+        if ($dimensions > $native) {
+            trigger_error(
+                sprintf("dimensions=%d exceeds the native %d dimensions of '%s'", $dimensions, $native, $model),
+                E_USER_WARNING
+            );
+        } elseif ($native % $dimensions !== 0) {
+            trigger_error(
+                sprintf(
+                    'dimensions=%d does not divide evenly into the native %d dimensions '
+                    . "of '%s'; use a power-of-two divisor (e.g. %d, %d)",
+                    $dimensions,
+                    $native,
+                    $model,
+                    intdiv($native, 2),
+                    intdiv($native, 4)
+                ),
+                E_USER_WARNING
+            );
+        }
+    }
+
+    /**
+     * Ensure a decoded embedding is the float list the client requested
+     * (the server returns strings for non-float encoding formats).
+     *
+     * @param array<int, float|int>|string $embedding
+     *
+     * @return array<int, float|int>
+     */
+    private static function floatEmbedding($embedding): array
+    {
+        if (is_string($embedding)) {
+            throw new ResponseParseException('expected a float embedding, got an encoded string');
+        }
+
+        return $embedding;
     }
 
     /**
