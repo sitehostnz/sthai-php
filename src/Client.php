@@ -11,9 +11,11 @@ use SthAI\Internal\Template;
 use SthAI\Model\EmbeddingModel;
 use SthAI\Model\EmbeddingParams;
 use SthAI\Model\InferenceModel;
+use SthAI\Model\RerankingModel;
 use SthAI\Response\EmbeddingResponse;
 use SthAI\Response\InferenceResponse;
 use SthAI\Response\ModelCard;
+use SthAI\Response\RerankResponse;
 use SthAI\Transport\CurlTransport;
 use SthAI\Transport\HttpResponse;
 use SthAI\Transport\TransportInterface;
@@ -665,6 +667,48 @@ final class Client
         }
 
         return $cards;
+    }
+
+    /**
+     * Score each document against the query and return the results sorted
+     * by relevance score descending, each carrying the document, its
+     * relevanceScore, and its index in the input documents list.
+     *
+     * All documents are returned unless topN limits it. The
+     * instruction-trained model applies its own default instruction; pass
+     * instruction to steer relevance for a specific task. The query and
+     * each document may be a plain string or, for multimodal input, an
+     * array of the form ['content' => [contentPart, ...]] wrapping
+     * text/image content parts (see Image for image parts).
+     *
+     * @param string|array<string, mixed>              $query
+     * @param array<int, string|array<string, mixed>>  $documents
+     *
+     * @return \SthAI\Response\RerankResult[]
+     */
+    public function rerank(
+        $query,
+        array $documents,
+        string $model = RerankingModel::QWEN_3_VL_8B,
+        ?int $topN = null,
+        ?string $instruction = null
+    ): array {
+        if ($documents === []) {
+            throw new InvalidArgumentException('rerank() requires at least one document');
+        }
+        if ($topN !== null && $topN < 1) {
+            throw new InvalidArgumentException('topN must be a positive integer');
+        }
+
+        $decoded = RerankResponse::fromArray($this->requestJson('POST', self::RERANKING_ENDPOINT, [
+            'query' => $query,
+            'documents' => array_values($documents),
+            'top_n' => $topN,
+            'model' => $model,
+            'instruction' => $instruction,
+        ]));
+
+        return $decoded->results;
     }
 
     /**
