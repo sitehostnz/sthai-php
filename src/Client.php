@@ -294,13 +294,15 @@ final class Client
             'content' => self::promptContent($prompt, $imageUrls, $imageFiles),
         ];
 
+        // Key order mirrors the Python client's struct field order, so the
+        // encoded bodies match the captured fixtures byte for byte
         return [
             'messages' => $messages,
             'model' => $model,
             'max_completion_tokens' => $maxTokens,
+            'response_format' => $responseFormat,
             'temperature' => $temperature,
             'chat_template_kwargs' => ['enable_thinking' => $useThinking],
-            'response_format' => $responseFormat,
         ];
     }
 
