@@ -1,0 +1,78 @@
+{
+  "endpoint": "/v1/embeddings",
+  "method": "POST",
+  "status_code": 200,
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "Represent the user's input."
+      },
+      {
+        "role": "user",
+        "content": "The Beehive is New Zealand's parliament building."
+      },
+      {
+        "role": "assistant",
+        "content": ""
+      }
+    ],
+    "model": "Qwen/Qwen3-VL-Embedding-8B",
+    "encoding_format": "float",
+    "dimensions": 32,
+    "continue_final_message": true,
+    "add_special_tokens": true
+  },
+  "response": {
+    "id": "embd-sthai-24d4d6b7f1f8c7fec93f45f3fdcd3bfe",
+    "object": "list",
+    "created": 1784355469,
+    "model": "Qwen/Qwen3-VL-Embedding-8B",
+    "data": [
+      {
+        "index": 0,
+        "object": "embedding",
+        "embedding": [
+          0.08456716686487198,
+          0.28796204924583435,
+          -0.07676097005605698,
+          -0.18301202356815338,
+          -0.08760291337966919,
+          -0.15612401068210602,
+          -0.13010333478450775,
+          0.12403184920549393,
+          0.08196510374546051,
+          -0.08456716686487198,
+          -0.07719464600086212,
+          -0.0984448567032814,
+          -0.16306285560131073,
+          -0.17520582675933838,
+          0.057245466858148575,
+          -0.11969506740570068,
+          -0.025044891983270645,
+          0.3243909776210785,
+          -0.2983703315258026,
+          0.3295951187610626,
+          0.1968897134065628,
+          0.12403184920549393,
+          -0.23939013481140137,
+          -0.22724716365337372,
+          0.14745044708251953,
+          -0.13617482781410217,
+          0.2914314866065979,
+          -0.1491851657629013,
+          0.11449093371629715,
+          -0.03447738289833069,
+          -0.23418600857257843,
+          0.13617482781410217
+        ]
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 30,
+      "total_tokens": 30,
+      "completion_tokens": 0,
+      "prompt_tokens_details": null
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "endpoint": "/v1/rerank",
+  "method": "POST",
+  "status_code": 200,
+  "request": {
+    "query": "What is the capital of New Zealand?",
+    "documents": [
+      "The capital of New Zealand is Wellington.",
+      "Auckland has the largest population in New Zealand.",
+      "Kiwi are nocturnal flightless birds native to New Zealand.",
+      "The All Blacks are New Zealand's national rugby team."
+    ],
+    "top_n": 2,
+    "model": "Qwen/Qwen3-VL-Reranker-8B"
+  },
+  "response": {
+    "id": "score-sthai-10bbf9dd896f5a2f69531f301b4d50cf",
+    "model": "Qwen/Qwen3-VL-Reranker-8B",
+    "usage": {
+      "prompt_tokens": 334,
+      "total_tokens": 334
+    },
+    "results": [
+      {
+        "index": 0,
+        "document": {
+          "text": "The capital of New Zealand is Wellington.",
+          "multi_modal": null
+        },
+        "relevance_score": 0.7486509084701538
+      },
+      {
+        "index": 1,
+        "document": {
+          "text": "Auckland has the largest population in New Zealand.",
+          "multi_modal": null
+        },
+        "relevance_score": 0.01709277555346489
+      }
+    ]
+  }
+}

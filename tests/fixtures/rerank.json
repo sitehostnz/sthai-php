@@ -1,0 +1,57 @@
+{
+  "endpoint": "/v1/rerank",
+  "method": "POST",
+  "status_code": 200,
+  "request": {
+    "query": "What is the capital of New Zealand?",
+    "documents": [
+      "The capital of New Zealand is Wellington.",
+      "Auckland has the largest population in New Zealand.",
+      "Kiwi are nocturnal flightless birds native to New Zealand.",
+      "The All Blacks are New Zealand's national rugby team."
+    ],
+    "model": "Qwen/Qwen3-VL-Reranker-8B"
+  },
+  "response": {
+    "id": "score-sthai-e9d6e40c5019401e636ef20b85fb3b16",
+    "model": "Qwen/Qwen3-VL-Reranker-8B",
+    "usage": {
+      "prompt_tokens": 334,
+      "total_tokens": 334
+    },
+    "results": [
+      {
+        "index": 0,
+        "document": {
+          "text": "The capital of New Zealand is Wellington.",
+          "multi_modal": null
+        },
+        "relevance_score": 0.7389363050460815
+      },
+      {
+        "index": 1,
+        "document": {
+          "text": "Auckland has the largest population in New Zealand.",
+          "multi_modal": null
+        },
+        "relevance_score": 0.0168136153370142
+      },
+      {
+        "index": 3,
+        "document": {
+          "text": "The All Blacks are New Zealand's national rugby team.",
+          "multi_modal": null
+        },
+        "relevance_score": 0.0015442705480381846
+      },
+      {
+        "index": 2,
+        "document": {
+          "text": "Kiwi are nocturnal flightless birds native to New Zealand.",
+          "multi_modal": null
+        },
+        "relevance_score": 0.0007564987172372639
+      }
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "endpoint": "/v1/chat/completions",
+  "method": "POST",
+  "status_code": 200,
+  "request": {
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is 17 + 25? Answer with just the number."
+      }
+    ],
+    "model": "Qwen/Qwen3.6-27B",
+    "max_completion_tokens": 400,
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    }
+  },
+  "response": {
+    "id": "chatcmpl-sthai-91aa36382afa96d2250c1cfda36f7dc3",
+    "object": "chat.completion",
+    "created": 1784355466,
+    "model": "Qwen/Qwen3.6-27B",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "\n\n42",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": [],
+          "reasoning": "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - Question: \"What is 17 + 25?\"\n   - Constraint: \"Answer with just the number.\"\n\n2.  **Perform Calculation:**\n   - 17 + 25 = 42\n\n3.  **Check Constraints:**\n   - Must answer in English (default, but this is just a number so language doesn't apply much)\n   - Must answer with *just* the number.\n\n4.  **Format Output:**\n   - Just \"42\"\n\n5.  **Final Verification:**\n   - Calculation is correct.\n   - Constraint met (only the number).\n   - Language constraint met (implicitly).\n\n   Output: 42\u2705\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "c03-infer-b",
+    "usage": {
+      "prompt_tokens": 50,
+      "total_tokens": 223,
+      "completion_tokens": 173,
+      "prompt_tokens_details": null
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null
+  }
+}

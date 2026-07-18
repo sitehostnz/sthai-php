@@ -1,0 +1,23 @@
+{
+  "endpoint": "/v1/chat/completions",
+  "method": "POST",
+  "status_code": 404,
+  "request": {
+    "messages": [
+      {
+        "role": "user",
+        "content": "hello"
+      }
+    ],
+    "model": "does-not-exist",
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    }
+  },
+  "response": {
+    "error": {
+      "message": "model not found",
+      "type": "invalid_request_error"
+    }
+  }
+}

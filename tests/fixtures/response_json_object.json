@@ -1,0 +1,59 @@
+{
+  "endpoint": "/v1/chat/completions",
+  "method": "POST",
+  "status_code": 200,
+  "request": {
+    "messages": [
+      {
+        "role": "user",
+        "content": "Return a JSON object with a single key \"answer\" whose value is 42."
+      }
+    ],
+    "model": "Qwen/Qwen3.6-27B",
+    "max_completion_tokens": 100,
+    "response_format": {
+      "type": "json_object"
+    },
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    }
+  },
+  "response": {
+    "id": "chatcmpl-sthai-ae235bf303878a5b0e8fc1209e0b15b8",
+    "object": "chat.completion",
+    "created": 1784355468,
+    "model": "Qwen/Qwen3.6-27B",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n  \"answer\": 42\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": [],
+          "reasoning": null
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "c03-infer-b",
+    "usage": {
+      "prompt_tokens": 54,
+      "total_tokens": 66,
+      "completion_tokens": 12,
+      "prompt_tokens_details": null
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null
+  }
+}

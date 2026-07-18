@@ -1,0 +1,89 @@
+{
+  "endpoint": "/v1/embeddings",
+  "method": "POST",
+  "status_code": 200,
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "Represent the user's input."
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "text",
+            "text": "A small red square."
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR4nGP4z8AARwzEcQCukw/x0F8jngAAAABJRU5ErkJggg=="
+            }
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": ""
+      }
+    ],
+    "model": "Qwen/Qwen3-VL-Embedding-8B",
+    "encoding_format": "float",
+    "dimensions": 32,
+    "continue_final_message": true,
+    "add_special_tokens": true
+  },
+  "response": {
+    "id": "embd-sthai-6c345e6e2fcaf7f4636d32d164d1a7f2",
+    "object": "list",
+    "created": 1784355469,
+    "model": "Qwen/Qwen3-VL-Embedding-8B",
+    "data": [
+      {
+        "index": 0,
+        "object": "embedding",
+        "embedding": [
+          0.24551288783550262,
+          0.1044226884841919,
+          -0.006152768153697252,
+          -0.03188478946685791,
+          0.09047309309244156,
+          -0.02570711262524128,
+          -0.17377211153507233,
+          -0.07771918177604675,
+          -0.11558236926794052,
+          -0.032482631504535675,
+          -0.34116727113723755,
+          0.2152223438024521,
+          -0.3395730257034302,
+          -0.11398813128471375,
+          0.015543836168944836,
+          0.003935778979212046,
+          -0.15224987268447876,
+          0.40493685007095337,
+          -0.27739769220352173,
+          -0.04922214522957802,
+          -0.23116473853588104,
+          -0.06496526300907135,
+          -0.0908716544508934,
+          0.041649509221315384,
+          0.23275896906852722,
+          -0.09924141317605972,
+          0.23594745993614197,
+          -0.19290298223495483,
+          0.2215992957353592,
+          -0.08927741646766663,
+          -0.1490613967180252,
+          0.08130621910095215
+        ]
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 223,
+      "total_tokens": 223,
+      "completion_tokens": 0,
+      "prompt_tokens_details": null
+    }
+  }
+}
