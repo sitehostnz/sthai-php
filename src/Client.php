@@ -171,6 +171,180 @@ final class Client
     }
 
     /**
+     * One-off inference: like chat(), but the stored chat history is
+     * neither sent nor updated. The response remains available through
+     * lastResponse() and lastReasoning().
+     *
+     * @param string[] $imageUrls  image URLs (or data URIs, e.g. from Image::dataUriFromBytes())
+     * @param string[] $imageFiles paths of local image files, inlined as data URIs
+     */
+    public function response(
+        string $prompt,
+        string $model = InferenceModel::QWEN_3_6_27B,
+        ?int $maxTokens = null,
+        ?float $temperature = null,
+        bool $useThinking = false,
+        ?string $systemPrompt = null,
+        array $imageUrls = [],
+        array $imageFiles = []
+    ): InferenceResponse {
+        return $this->inferenceRequest($this->oneOffBody(
+            $prompt,
+            $model,
+            $maxTokens,
+            $temperature,
+            $useThinking,
+            $systemPrompt,
+            $imageUrls,
+            $imageFiles,
+            null
+        ));
+    }
+
+    /**
+     * One-off inference with a structured response, returning the decoded
+     * JSON as an associative array.
+     *
+     * Pass a JSON schema (as a PHP array) for the server to enforce during
+     * generation via guided decoding; with the default null schema the
+     * output is only constrained to valid JSON ("json_object" mode). The
+     * client does not re-validate the result against the schema. The full
+     * response remains available through lastResponse().
+     *
+     * Thinking combines with structured responses (reasoning stays
+     * unconstrained) but consumes maxTokens, so budget generously. The
+     * server occasionally skips the schema when thinking is enabled;
+     * parsing then throws a ResponseParseException - retry, or disable
+     * thinking.
+     *
+     * @param array<string, mixed>|null $schema     JSON schema for guided decoding; empty
+     *                                              nested objects must be stdClass, not []
+     * @param string                    $schemaName name sent alongside the schema
+     * @param string[]                  $imageUrls
+     * @param string[]                  $imageFiles
+     *
+     * @return array<mixed> the decoded response JSON
+     */
+    public function structuredResponse(
+        string $prompt,
+        ?array $schema = null,
+        string $schemaName = 'response',
+        string $model = InferenceModel::QWEN_3_6_27B,
+        ?int $maxTokens = null,
+        ?float $temperature = null,
+        bool $useThinking = false,
+        ?string $systemPrompt = null,
+        array $imageUrls = [],
+        array $imageFiles = []
+    ): array {
+        $responseFormat = $schema === null
+            ? ['type' => 'json_object']
+            : [
+                'type' => 'json_schema',
+                'json_schema' => ['name' => $schemaName, 'schema' => $schema],
+            ];
+
+        $decoded = $this->inferenceRequest($this->oneOffBody(
+            $prompt,
+            $model,
+            $maxTokens,
+            $temperature,
+            $useThinking,
+            $systemPrompt,
+            $imageUrls,
+            $imageFiles,
+            $responseFormat
+        ));
+
+        return $this->parseStructured($decoded);
+    }
+
+    /**
+     * The request body for a one-off (history-less) inference call.
+     *
+     * @param string[]                  $imageUrls
+     * @param string[]                  $imageFiles
+     * @param array<string, mixed>|null $responseFormat
+     *
+     * @return array<string, mixed>
+     */
+    private function oneOffBody(
+        string $prompt,
+        string $model,
+        ?int $maxTokens,
+        ?float $temperature,
+        bool $useThinking,
+        ?string $systemPrompt,
+        array $imageUrls,
+        array $imageFiles,
+        ?array $responseFormat
+    ): array {
+        $messages = [];
+        if ($systemPrompt !== null && $systemPrompt !== '') {
+            $messages[] = ['role' => 'system', 'content' => $systemPrompt];
+        }
+        $messages[] = [
+            'role' => 'user',
+            'content' => self::promptContent($prompt, $imageUrls, $imageFiles),
+        ];
+
+        return [
+            'messages' => $messages,
+            'model' => $model,
+            'max_completion_tokens' => $maxTokens,
+            'temperature' => $temperature,
+            'chat_template_kwargs' => ['enable_thinking' => $useThinking],
+            'response_format' => $responseFormat,
+        ];
+    }
+
+    /**
+     * Decode a structured response's text into an array.
+     *
+     * Guided decoding guarantees schema-valid syntax but not completeness
+     * (token-limit cutoffs) nor, with reasoning models, that the schema was
+     * applied at all - so parsing doubles as the check, throwing a
+     * ResponseParseException naming the cause on failure.
+     *
+     * @return array<mixed>
+     */
+    private function parseStructured(InferenceResponse $response): array
+    {
+        $text = $response->output()->text;
+        if ($text === null) {
+            throw new ResponseParseException('response has no text content to parse');
+        }
+
+        $decoded = json_decode($text, true);
+        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+            $choices = $response->choices;
+            if ($choices !== [] && $choices[0]->finishReason === 'length') {
+                throw new ResponseParseException(
+                    'structured response was cut off by the token limit before '
+                    . 'the JSON completed; raise maxTokens'
+                );
+            }
+            // Guided decoding should make this impossible, but reasoning
+            // models have been seen to intermittently emit non-JSON content
+            throw new ResponseParseException(sprintf(
+                'structured response is not valid JSON (%s); content began: %s',
+                json_last_error_msg(),
+                var_export(substr($text, 0, 120), true)
+            ));
+        }
+
+        if (!is_array($decoded)) {
+            // A schema with a scalar top level decodes to a scalar; the
+            // client only supports object/array results
+            throw new ResponseParseException(
+                'structured response decoded to a scalar, not a JSON object or array'
+            );
+        }
+
+        return $decoded;
+    }
+
+    /**
      * POST an inference request and record the decoded last response.
      *
      * @param array<string, mixed> $body
