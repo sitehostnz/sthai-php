@@ -19,7 +19,7 @@ final class ClientCoreTest extends ClientTestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('apiKey');
-        new Client('', 'ai.sitehost.nz', true, null, false, $this->transport);
+        new Client('', 'ai.sitehost.nz', true, null, false, true, $this->transport);
     }
 
     public function testApiKeyFallsBackToEnvironment(): void
@@ -28,7 +28,7 @@ final class ClientCoreTest extends ClientTestCase
 
         try {
             $this->transport->register('health');
-            $client = new Client(null, 'ai.sitehost.nz', true, null, false, $this->transport);
+            $client = new Client(null, 'ai.sitehost.nz', true, null, false, true, $this->transport);
             $client->healthy();
             $this->assertSame(
                 'Bearer env-key',

@@ -22,7 +22,7 @@ abstract class ClientTestCase extends TestCase
     /**
      * A client with a dummy key backed by $this->transport. Overrides
      * apply on top of the defaults (keys: apiKey, fqdn, secure,
-     * sessionPin, autoSession).
+     * sessionPin, autoSession, writeHistory).
      *
      * @param array<string, mixed> $overrides
      */
@@ -34,6 +34,7 @@ abstract class ClientTestCase extends TestCase
             $overrides['secure'] ?? true,
             $overrides['sessionPin'] ?? null,
             $overrides['autoSession'] ?? false,
+            $overrides['writeHistory'] ?? true,
             $this->transport
         );
     }
