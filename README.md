@@ -1,8 +1,8 @@
 # sthai-php
 
-[![Tests](https://github.com/ftsartek/sthai-php/actions/workflows/tests.yml/badge.svg)](https://github.com/ftsartek/sthai-php/actions/workflows/tests.yml)
+[![Tests](https://github.com/sitehostnz/sthai-php/actions/workflows/tests.yml/badge.svg)](https://github.com/sitehostnz/sthai-php/actions/workflows/tests.yml)
 
-A PHP client for the [SiteHost AI Platform](https://kb.sitehost.nz/ai-platform): inference, embeddings and reranking, with no runtime dependencies beyond `ext-curl` and `ext-json`. A port of the Python client, [sthai-py](https://github.com/ftsartek/sthai-py), matching its functionality and wire format.
+A PHP client for the [SiteHost AI Platform](https://kb.sitehost.nz/ai-platform): inference, embeddings and reranking, with no runtime dependencies beyond `ext-curl` and `ext-json`. A port of the Python client, [sthai-py](https://github.com/sitehostnz/sthai-py), matching its functionality and wire format.
 
 ## The SiteHost AI Platform
 
@@ -23,7 +23,7 @@ The platform currently serves three models, one per capability (see the [models 
 Requires PHP 7.4 or newer with `ext-curl` and `ext-json`. Install via [Composer](https://getcomposer.org/):
 
 ```bash
-composer require ftsartek/sthai
+composer require sitehostnz/sthai
 ```
 
 On PHP 8.0+ every optional parameter can be passed as a named argument, which the examples below use. On PHP 7.4 pass them positionally.
@@ -180,7 +180,7 @@ Everything the library throws implements `SthAI\Exception\SthAIException`: `Http
 The test suite runs entirely offline against fixtures captured from the live API (shared with sthai-py):
 
 ```bash
-git clone https://github.com/ftsartek/sthai-php.git
+git clone https://github.com/sitehostnz/sthai-php.git
 cd sthai-php
 composer install
 composer test      # phpunit
