@@ -56,6 +56,10 @@ $client->clearHistory();
 $client->chat('Be brief: why is the sky blue?', systemPrompt: 'You are terse.');
 ```
 
+The stored history can be read with `history()` and restored with `setHistory()`, so a conversation can be persisted and picked up later. `setWriteHistory(false)` stops `chat()` recording new turns (the stored history is kept and still sent); `writeHistory()` reads the current setting.
+
+`historyUsage()` totals token usage across the calls that built the stored history. Each call resends the conversation so far, so input tokens count what the server processed (as billed), not unique tokens. `clearHistory()` and `setHistory()` reset the tally along with the turns it covered.
+
 Thinking models can reason before answering; the reasoning rides along on the response:
 
 ```php
@@ -160,6 +164,10 @@ Pinning requests to a server session keeps routing consistent and helps caching.
 
 ```php
 $client = new Client(autoSession: true);
+echo $client->sessionPin();        // the pin in use, e.g. to persist it
+
+$client->setSessionPin('my-pin');  // pin to a known session (null unpins)
+$pin = $client->newSession();      // switch to a freshly generated pin
 ```
 
 ### Models and health

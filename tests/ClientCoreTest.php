@@ -83,6 +83,44 @@ final class ClientCoreTest extends ClientTestCase
         $this->assertTrue(ctype_xdigit($pin));
     }
 
+    public function testSessionPinAccessors(): void
+    {
+        $this->transport->register('health');
+        $client = $this->client();
+        $this->assertNull($client->sessionPin());
+
+        $client->setSessionPin('my-pin');
+        $this->assertSame('my-pin', $client->sessionPin());
+        $client->healthy();
+        $this->assertSame('my-pin', $this->transport->lastCall()->headers[Client::SESSION_PIN_HEADER]);
+
+        $client->setSessionPin(null);
+        $this->assertNull($client->sessionPin());
+        $client->healthy();
+        $this->assertArrayNotHasKey(Client::SESSION_PIN_HEADER, $this->transport->lastCall()->headers);
+    }
+
+    public function testAutoSessionPinIsReadable(): void
+    {
+        $pin = $this->client(['autoSession' => true])->sessionPin();
+        $this->assertNotNull($pin);
+        $this->assertSame(48, strlen($pin));
+        $this->assertTrue(ctype_xdigit($pin));
+    }
+
+    public function testNewSessionGeneratesAndSendsPin(): void
+    {
+        $client = $this->client(['sessionPin' => 'old-pin']);
+        $pin = $client->newSession();
+        $this->assertSame(48, strlen($pin));
+        $this->assertTrue(ctype_xdigit($pin));
+        $this->assertSame($pin, $client->sessionPin());
+
+        $this->transport->register('health');
+        $client->healthy();
+        $this->assertSame($pin, $this->transport->lastCall()->headers[Client::SESSION_PIN_HEADER]);
+    }
+
     public function testHealthyTrueOn200(): void
     {
         $this->transport->register('health');
