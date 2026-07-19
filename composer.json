@@ -1,5 +1,5 @@
 {
-    "name": "ftsartek/sthai",
+    "name": "sitehostnz/sthai",
     "description": "PHP client for the SiteHost AI Platform: inference, embeddings and reranking",
     "type": "library",
     "license": "MIT",
@@ -8,8 +8,8 @@
         { "name": "Jordan Russell" }
     ],
     "support": {
-        "issues": "https://github.com/ftsartek/sthai-php/issues",
-        "source": "https://github.com/ftsartek/sthai-php"
+        "issues": "https://github.com/sitehostnz/sthai-php/issues",
+        "source": "https://github.com/sitehostnz/sthai-php"
     },
     "require": {
         "php": ">=7.4",
