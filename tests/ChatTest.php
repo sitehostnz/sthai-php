@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SthAI\Tests;
 
 use SthAI\Exception\HttpException;
+use SthAI\Exception\InvalidArgumentException;
 use SthAI\Response\InferenceResponse;
 use SthAI\Tests\Support\ClientTestCase;
 
@@ -177,6 +178,90 @@ final class ChatTest extends ClientTestCase
         $body = $this->transport->lastCall()->body;
         $this->assertNotNull($body);
         $this->assertSame(['user'], array_column($body['messages'], 'role'));
+    }
+
+    public function testHistoryGetterReturnsStoredTurns(): void
+    {
+        $fixture = $this->transport->register('chat_simple');
+        $client = $this->client();
+        $this->assertSame([], $client->history());
+
+        $client->chat('first');
+        $this->assertSame([
+            ['role' => 'user', 'content' => 'first'],
+            ['role' => 'assistant', 'content' => $fixture['response']['choices'][0]['message']['content']],
+        ], $client->history());
+    }
+
+    public function testSetHistoryRestoresConversation(): void
+    {
+        $this->transport->register('chat_simple');
+        $client = $this->client();
+        $client->setHistory([
+            ['role' => 'user', 'content' => 'earlier question'],
+            ['role' => 'assistant', 'content' => 'earlier answer'],
+        ]);
+
+        $client->chat('follow-up');
+        $body = $this->transport->lastCall()->body;
+        $this->assertNotNull($body);
+        $this->assertSame(['user', 'assistant', 'user'], array_column($body['messages'], 'role'));
+        $this->assertSame('earlier question', $body['messages'][0]['content']);
+        $this->assertSame('follow-up', $body['messages'][2]['content']);
+    }
+
+    public function testSetHistoryRejectsMalformedTurns(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('history turn');
+        $this->client()->setHistory([['role' => 'user']]);
+    }
+
+    public function testWriteHistoryAccessors(): void
+    {
+        $this->transport->register('chat_simple');
+        $client = $this->client();
+        $this->assertTrue($client->writeHistory());
+
+        $client->setWriteHistory(false);
+        $this->assertFalse($client->writeHistory());
+        $client->chat('first');
+        $this->assertSame([], $client->history());
+    }
+
+    public function testHistoryUsageAccumulates(): void
+    {
+        $fixture = $this->transport->register('chat_simple');
+        $client = $this->client();
+        $this->assertSame(0, $client->historyUsage()->inputTokens);
+
+        $client->chat('first');
+        $client->chat('second');
+        $usage = $fixture['response']['usage'];
+        $total = $client->historyUsage();
+        $this->assertSame($usage['prompt_tokens'] * 2, $total->inputTokens);
+        $this->assertSame($usage['completion_tokens'] * 2, $total->outputTokens);
+    }
+
+    public function testHistoryUsageExcludesUnrecordedCalls(): void
+    {
+        $this->transport->register('chat_simple');
+        $client = $this->client();
+        $client->chat('standalone', 'Qwen/Qwen3.6-27B', null, null, false, null, [], [], false);
+        $this->assertSame(0, $client->historyUsage()->inputTokens);
+    }
+
+    public function testHistoryUsageResetsWithHistory(): void
+    {
+        $this->transport->register('chat_simple');
+        $client = $this->client();
+        $client->chat('first');
+        $client->clearHistory();
+        $this->assertSame(0, $client->historyUsage()->inputTokens);
+
+        $client->chat('again');
+        $client->setHistory([['role' => 'user', 'content' => 'restored']]);
+        $this->assertSame(0, $client->historyUsage()->inputTokens);
     }
 
     public function testFailedCallDoesNotWriteHistory(): void

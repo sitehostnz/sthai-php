@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-07-20
+
+### Added
+
+- Accessors for client state: `sessionPin()`/`setSessionPin()` and `newSession()` for reading, changing or regenerating the session pin after construction; `history()`/`setHistory()` for persisting and restoring conversations; and `writeHistory()`/`setWriteHistory()` for toggling history recording.
+- `historyUsage()` totalling token usage across the calls that built the stored history.
+
 ## [1.0.0] - 2026-07-20
 
 First stable release.
@@ -25,5 +32,6 @@ Initial release: a PHP port of [sthai-py](https://github.com/sitehostnz/sthai-py
 - `models()`, `healthy()`, session pinning (explicit or auto-generated) and `SthAI\Image` data-URI helpers
 - Offline test suite replaying fixtures captured from the live API, shared with sthai-py
 
+[1.1.0]: https://github.com/sitehostnz/sthai-php/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/sitehostnz/sthai-php/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/sitehostnz/sthai-php/releases/tag/v0.1.0
