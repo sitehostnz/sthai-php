@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace SthAI\Tests;
 
 use PHPUnit\Framework\TestCase;
-use SthAI\Exception\HttpException;
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\ApiException;
+use SthAI\Exception\ApiStatusException;
+use SthAI\Exception\ClientException;
+use SthAI\Exception\InputException;
+use SthAI\Exception\ResponseException;
 use SthAI\Exception\ResponseParseException;
 use SthAI\Exception\SthAIException;
 use SthAI\Exception\TransportException;
@@ -30,24 +33,27 @@ final class TransportTest extends TestCase
         $this->assertSame('{"error":"nope"}', $response->getBody());
     }
 
-    public function testHttpExceptionCarriesStatusAndBody(): void
-    {
-        $exception = new HttpException(404, 'POST', '/v1/chat/completions', '{"detail":"missing"}');
-        $this->assertSame('HTTP 404 for POST /v1/chat/completions', $exception->getMessage());
-        $this->assertSame(404, $exception->getStatusCode());
-        $this->assertSame('{"detail":"missing"}', $exception->getResponseBody());
-    }
-
     public function testEveryExceptionImplementsTheMarkerInterface(): void
     {
-        $this->assertInstanceOf(SthAIException::class, new InvalidArgumentException('bad'));
+        $this->assertInstanceOf(SthAIException::class, new InputException('bad'));
         $this->assertInstanceOf(SthAIException::class, new TransportException('down'));
-        $this->assertInstanceOf(SthAIException::class, new HttpException(500, 'GET', '/health', ''));
+        $this->assertInstanceOf(SthAIException::class, new ClientException(400, ''));
+        $this->assertInstanceOf(SthAIException::class, new ApiException(500, ''));
+        $this->assertInstanceOf(SthAIException::class, new ResponseException('bad body'));
         $this->assertInstanceOf(SthAIException::class, new ResponseParseException('cut off'));
     }
 
-    public function testInvalidArgumentExceptionIsCatchableAsSpl(): void
+    public function testExceptionHierarchy(): void
     {
-        $this->assertInstanceOf(\InvalidArgumentException::class, new InvalidArgumentException('bad'));
+        // catch (ApiStatusException) handles 4xx and 5xx together; parse
+        // failures are catchable as the broader ResponseException
+        $this->assertInstanceOf(ApiStatusException::class, new ClientException(400, ''));
+        $this->assertInstanceOf(ApiStatusException::class, new ApiException(500, ''));
+        $this->assertInstanceOf(ResponseException::class, new ResponseParseException('cut off'));
+    }
+
+    public function testInputExceptionIsCatchableAsSpl(): void
+    {
+        $this->assertInstanceOf(\InvalidArgumentException::class, new InputException('bad'));
     }
 }

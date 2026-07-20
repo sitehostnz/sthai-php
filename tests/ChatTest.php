@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SthAI\Tests;
 
-use SthAI\Exception\HttpException;
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\ClientException;
+use SthAI\Exception\InputException;
 use SthAI\Response\InferenceResponse;
 use SthAI\Tests\Support\ClientTestCase;
 
@@ -212,7 +212,7 @@ final class ChatTest extends ClientTestCase
 
     public function testSetHistoryRejectsMalformedTurns(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('history turn');
         $this->client()->setHistory([['role' => 'user']]);
     }
@@ -271,8 +271,8 @@ final class ChatTest extends ClientTestCase
 
         try {
             $client->chat('doomed');
-            $this->fail('expected HttpException');
-        } catch (HttpException $exception) {
+            $this->fail('expected ClientException');
+        } catch (ClientException $exception) {
             $this->assertGreaterThanOrEqual(400, $exception->getStatusCode());
         }
 

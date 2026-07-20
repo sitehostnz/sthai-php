@@ -7,6 +7,6 @@ namespace SthAI\Exception;
 /**
  * A caller-supplied argument failed one of the client's input guards.
  */
-class InvalidArgumentException extends \InvalidArgumentException implements SthAIException
+class InputException extends \InvalidArgumentException implements SthAIException
 {
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SthAI\Internal;
 
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\InputException;
 
 /**
  * Renderer for the {instruction}/{text} embedding templates, matching the
@@ -36,7 +36,7 @@ final class Template
         // With escapes parked and the two valid placeholders removed, any
         // remaining brace is a stray placeholder or an unbalanced brace
         if (preg_match('/[{}]/', str_replace(['{instruction}', '{text}'], '', $working)) === 1) {
-            throw new InvalidArgumentException(
+            throw new InputException(
                 'template must use only the {instruction} and {text} placeholders; '
                 . 'escape literal braces as {{ and }}'
             );

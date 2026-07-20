@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SthAI\Tests;
 
 use PHPUnit\Framework\TestCase;
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\InputException;
 use SthAI\Image;
 
 final class ImageTest extends TestCase
@@ -66,14 +66,14 @@ final class ImageTest extends TestCase
 
     public function testUnreadableFileThrows(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('unable to read image file');
         Image::dataUriFromFile('/no/such/file.png');
     }
 
     public function testUnrecognizedFormatThrows(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('unrecognized image format');
         Image::dataUriFromBytes('plain text, not an image');
     }

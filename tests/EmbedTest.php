@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SthAI\Tests;
 
-use SthAI\Exception\InvalidArgumentException;
-use SthAI\Exception\ResponseParseException;
+use SthAI\Exception\InputException;
+use SthAI\Exception\ResponseException;
 use SthAI\Image;
 use SthAI\Model\EmbeddingParams;
 use SthAI\Tests\Support\ClientTestCase;
@@ -111,21 +111,21 @@ final class EmbedTest extends ClientTestCase
 
     public function testNoInputRaises(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('requires text and/or images');
         $this->client()->embed();
     }
 
     public function testEmptyStringTreatedAsNoText(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('requires text and/or images');
         $this->client()->embed('');
     }
 
     public function testZeroDimensionsRaises(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('positive integer');
         $this->client()->embed('text', 'Qwen/Qwen3-VL-Embedding-8B', false, null, [], [], 0);
     }
@@ -158,7 +158,7 @@ final class EmbedTest extends ClientTestCase
         $fixture = Fixtures::load('embed_single');
         $fixture['response']['data'] = [];
         $this->transport->respond('POST', '/v1/embeddings', $fixture['response']);
-        $this->expectException(ResponseParseException::class);
+        $this->expectException(ResponseException::class);
         $this->expectExceptionMessage('no embedding data');
         $this->client()->embed('text');
     }

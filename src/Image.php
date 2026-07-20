@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SthAI;
 
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\InputException;
 
 /**
  * Helpers for building image_url content parts from URLs, local files or
@@ -55,7 +55,7 @@ final class Image
     {
         $bytes = @file_get_contents($path);
         if ($bytes === false) {
-            throw new InvalidArgumentException(sprintf('unable to read image file: %s', $path));
+            throw new InputException(sprintf('unable to read image file: %s', $path));
         }
 
         return self::dataUriFromBytes($bytes);
@@ -88,7 +88,7 @@ final class Image
             return 'image/gif';
         }
 
-        throw new InvalidArgumentException(
+        throw new InputException(
             'unrecognized image format: expected PNG, JPEG, GIF, or WEBP'
         );
     }

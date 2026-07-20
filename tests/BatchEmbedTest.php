@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SthAI\Tests;
 
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\InputException;
 use SthAI\Internal\Template;
 use SthAI\Model\EmbeddingParams;
 use SthAI\Tests\Support\ClientTestCase;
@@ -83,21 +83,21 @@ final class BatchEmbedTest extends ClientTestCase
 
     public function testEmptyListRaises(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('at least one text');
         $this->client()->batchEmbed([]);
     }
 
     public function testEmptyStringMemberRaises(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('non-empty strings');
         $this->client()->batchEmbed(['fine', '']);
     }
 
     public function testUnknownModelWithoutTemplateRaises(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('no known embedding template');
         $this->client()->batchEmbed(['text'], 'unknown/model');
     }
@@ -115,7 +115,7 @@ final class BatchEmbedTest extends ClientTestCase
 
     public function testStrayTemplatePlaceholderRaises(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('escape literal braces');
         $this->client()->batchEmbed(['text'], 'Qwen/Qwen3-VL-Embedding-8B', false, null, '{text} {oops}');
     }

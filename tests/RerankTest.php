@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SthAI\Tests;
 
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\InputException;
 use SthAI\Response\RerankResult;
 use SthAI\Tests\Support\ClientTestCase;
 
@@ -91,14 +91,14 @@ final class RerankTest extends ClientTestCase
 
     public function testEmptyDocumentsRaises(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('at least one document');
         $this->client()->rerank(self::QUERY, []);
     }
 
     public function testZeroTopNRaises(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('positive integer');
         $this->client()->rerank(self::QUERY, self::DOCUMENTS, 'Qwen/Qwen3-VL-Reranker-8B', 0);
     }
