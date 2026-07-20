@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace SthAI;
 
-use SthAI\Exception\HttpException;
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\ApiStatusException;
+use SthAI\Exception\InputException;
+use SthAI\Exception\ResponseException;
 use SthAI\Exception\ResponseParseException;
 use SthAI\Internal\Template;
 use SthAI\Model\EmbeddingModel;
@@ -78,7 +79,7 @@ final class Client
             $apiKey = $envKey === false ? '' : $envKey;
         }
         if ($apiKey === '') {
-            throw new InvalidArgumentException('apiKey is required (or set the STHAI_KEY environment variable)');
+            throw new InputException('apiKey is required (or set the STHAI_KEY environment variable)');
         }
 
         $this->apiKey = $apiKey;
@@ -160,7 +161,7 @@ final class Client
         $turns = [];
         foreach ($history as $turn) {
             if (!is_array($turn) || !isset($turn['role']) || !array_key_exists('content', $turn)) {
-                throw new InvalidArgumentException(
+                throw new InputException(
                     "each history turn must be an array with 'role' and 'content' keys"
                 );
             }
@@ -502,7 +503,7 @@ final class Client
         }
         $parts = array_merge($parts, $imageParts);
         if ($parts === []) {
-            throw new InvalidArgumentException('embed() requires text and/or images');
+            throw new InputException('embed() requires text and/or images');
         }
         self::checkDimensions($model, $dimensions);
         $content = ($hasText && $imageParts === []) ? $text : $parts;
@@ -532,7 +533,7 @@ final class Client
         ]);
         $outputs = $decoded->output();
         if ($outputs === []) {
-            throw new ResponseParseException('server returned no embedding data');
+            throw new ResponseException('server returned no embedding data');
         }
 
         return self::floatEmbedding($outputs[0]);
@@ -564,18 +565,18 @@ final class Client
         ?int $dimensions = null
     ): array {
         if ($texts === []) {
-            throw new InvalidArgumentException('batchEmbed() requires at least one text');
+            throw new InputException('batchEmbed() requires at least one text');
         }
         foreach ($texts as $text) {
             if ($text === '') {
-                throw new InvalidArgumentException('batchEmbed() texts must be non-empty strings');
+                throw new InputException('batchEmbed() texts must be non-empty strings');
             }
         }
         if ($template === null) {
             $params = EmbeddingParams::forModel($model);
             $template = $params !== null ? $params->getTemplate() : null;
             if ($template === null) {
-                throw new InvalidArgumentException(sprintf(
+                throw new InputException(sprintf(
                     "no known embedding template for model '%s'; pass template "
                     . '(use "{text}" for models that take raw untemplated input)',
                     $model
@@ -592,7 +593,7 @@ final class Client
         if ($instruction === null) {
             $instruction = self::defaultInstruction($model, $query);
             if ($instruction === null && Template::hasPlaceholder($template, 'instruction')) {
-                throw new InvalidArgumentException(sprintf(
+                throw new InputException(sprintf(
                     "no known embedding instruction for model '%s' but the "
                     . 'template expects one; pass instruction',
                     $model
@@ -658,7 +659,7 @@ final class Client
             return;
         }
         if ($dimensions < 1) {
-            throw new InvalidArgumentException('dimensions must be a positive integer');
+            throw new InputException('dimensions must be a positive integer');
         }
         $params = EmbeddingParams::forModel($model);
         if ($params === null || $params->getDimensions() === null) {
@@ -697,7 +698,7 @@ final class Client
     private static function floatEmbedding($embedding): array
     {
         if (is_string($embedding)) {
-            throw new ResponseParseException('expected a float embedding, got an encoded string');
+            throw new ResponseException('expected a float embedding, got an encoded string');
         }
 
         return $embedding;
@@ -809,10 +810,10 @@ final class Client
         ?string $instruction = null
     ): array {
         if ($documents === []) {
-            throw new InvalidArgumentException('rerank() requires at least one document');
+            throw new InputException('rerank() requires at least one document');
         }
         if ($topN !== null && $topN < 1) {
-            throw new InvalidArgumentException('topN must be a positive integer');
+            throw new InputException('topN must be a positive integer');
         }
 
         $decoded = RerankResponse::fromArray($this->requestJson('POST', self::RERANKING_ENDPOINT, [
@@ -896,12 +897,12 @@ final class Client
     {
         $response = $this->request($method, $endpoint, $body);
         if (!$response->isOk()) {
-            throw new HttpException($response->getStatusCode(), $method, $endpoint, $response->getBody());
+            throw ApiStatusException::fromResponse($response->getStatusCode(), $response->getBody());
         }
 
         $decoded = json_decode($response->getBody(), true);
         if (!is_array($decoded)) {
-            throw new ResponseParseException(
+            throw new ResponseException(
                 sprintf('server returned invalid JSON for %s %s', $method, $endpoint)
             );
         }

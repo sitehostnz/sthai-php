@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SthAI\Tests;
 
 use SthAI\Client;
-use SthAI\Exception\HttpException;
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\ClientException;
+use SthAI\Exception\InputException;
 use SthAI\Response\ModelCard;
 use SthAI\Tests\Support\ClientTestCase;
 
@@ -17,7 +17,7 @@ final class ClientCoreTest extends ClientTestCase
         // Make sure the constructor cannot fall back to a real environment key
         putenv('STHAI_KEY');
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         $this->expectExceptionMessage('apiKey');
         new Client('', 'ai.sitehost.nz', true, null, false, true, $this->transport);
     }
@@ -148,16 +148,20 @@ final class ClientCoreTest extends ClientTestCase
         $this->assertSame($expected, $ids);
     }
 
-    public function testHttpErrorRaisedOnErrorStatus(): void
+    public function testClientExceptionRaisedOnErrorStatus(): void
     {
+        // "error" is a string, not the {"message", "type"} envelope, so the
+        // parsed fields stay null and the message falls back
         $this->transport->respond('GET', '/v1/models', ['error' => 'nope'], 401);
 
         try {
             $this->client()->models();
-            $this->fail('expected HttpException');
-        } catch (HttpException $exception) {
+            $this->fail('expected ClientException');
+        } catch (ClientException $exception) {
             $this->assertSame(401, $exception->getStatusCode());
-            $this->assertStringContainsString('/v1/models', $exception->getMessage());
+            $this->assertSame('401: HTTP error', $exception->getMessage());
+            $this->assertNull($exception->getServerMessage());
+            $this->assertNull($exception->getErrorType());
             $this->assertSame('{"error":"nope"}', $exception->getResponseBody());
         }
     }

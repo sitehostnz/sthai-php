@@ -181,7 +181,34 @@ foreach ($client->models() as $card) {
 
 ### Errors
 
-Everything the library throws implements `SthAI\Exception\SthAIException`: `HttpException` (HTTP error statuses, with `getStatusCode()` and `getResponseBody()`), `TransportException` (connection-level failures), `ResponseParseException` (undecodable or cut-off responses) and `InvalidArgumentException` (input guards).
+Everything the library throws implements `SthAI\Exception\SthAIException`, so catching it is enough to handle anything the client can throw:
+
+```php
+use SthAI\Client;
+use SthAI\Exception\ApiException;
+use SthAI\Exception\ClientException;
+use SthAI\Exception\InputException;
+use SthAI\Exception\ResponseException;
+use SthAI\Exception\TransportException;
+
+$client = new Client();
+try {
+    $response = $client->chat('hello', model: 'no-such-model');
+} catch (ClientException $e) {
+    echo $e->getStatusCode(), ' ', $e->getErrorType(), ' ', $e->getMessage();
+    // 404 invalid_request_error 404: model not found (invalid_request_error)
+} catch (ApiException $e) {
+    // 5xx: the server had a problem
+} catch (TransportException $e) {
+    // the request never completed: connection failure, timeout, TLS error
+} catch (InputException $e) {
+    // bad arguments to a client method
+} catch (ResponseException $e) {
+    // the server returned something the client couldn't use
+}
+```
+
+`ClientException` (4xx) and `ApiException` (5xx) both extend `ApiStatusException`, which carries `getStatusCode()`, `getResponseBody()`, `getServerMessage()` and `getErrorType()` (parsed from the server's error body when present). `ResponseParseException`, thrown by `structuredResponse()`'s parsing, extends `ResponseException`.
 
 ## Development
 

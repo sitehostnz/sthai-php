@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SthAI\Tests;
 
 use PHPUnit\Framework\TestCase;
-use SthAI\Exception\InvalidArgumentException;
+use SthAI\Exception\InputException;
 use SthAI\Internal\Template;
 use SthAI\Model\EmbeddingParams;
 
@@ -45,13 +45,13 @@ final class TemplateTest extends TestCase
 
     public function testUnknownPlaceholderIsRejected(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         Template::render('{other} {text}', null, 'hello');
     }
 
     public function testUnbalancedBraceIsRejected(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InputException::class);
         Template::render('broken { {text}', null, 'hello');
     }
 
