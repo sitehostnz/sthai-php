@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SthAI\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SthAI\Exception\ResponseException;
 use SthAI\Response\EmbeddingResponse;
 use SthAI\Response\InferenceResponse;
 use SthAI\Response\ModelCard;
@@ -131,6 +132,26 @@ final class ResponseHydrationTest extends TestCase
         ]);
         $this->assertSame([[0.1], [0.2]], $response->output());
         $this->assertSame(3, $response->usage()->inputTokens);
+    }
+
+    public function testEmbeddingOutputRejectsEncodedStrings(): void
+    {
+        $response = EmbeddingResponse::fromArray([
+            'id' => 'x',
+            'data' => [['index' => 0, 'embedding' => 'bm90IGZsb2F0cw==']],
+            'usage' => [],
+        ]);
+        $this->expectException(ResponseException::class);
+        $this->expectExceptionMessage('encoded string');
+        $response->output();
+    }
+
+    public function testEmbeddingOutputOnEmptyDataRaises(): void
+    {
+        $response = EmbeddingResponse::fromArray(['id' => 'x', 'data' => [], 'usage' => []]);
+        $this->expectException(ResponseException::class);
+        $this->expectExceptionMessage('no embedding data');
+        $response->output();
     }
 
     public function testModelCardHydration(): void

@@ -31,10 +31,18 @@ final class EmbedTest extends ClientTestCase
             [],
             [],
             32
-        );
+        )->output()[0];
         $this->assertSame($fixture['response']['data'][0]['embedding'], $vector);
         $this->assertCount(32, $vector);
         $this->assertContainsOnly('float', $vector);
+    }
+
+    public function testUsageReportsTokenCounts(): void
+    {
+        $fixture = $this->transport->register('embed_single');
+        $usage = $this->client()->embed('The Beehive.')->usage();
+        $this->assertSame($fixture['response']['usage']['prompt_tokens'], $usage->inputTokens);
+        $this->assertSame(0, $usage->outputTokens);
     }
 
     public function testChatFormRequestShape(): void
@@ -99,7 +107,7 @@ final class EmbedTest extends ClientTestCase
             false,
             null,
             [Image::dataUriFromBytes(self::FAKE_PNG)]
-        );
+        )->output()[0];
         $this->assertNotEmpty($vector);
         $body = $this->transport->lastCall()->body;
         $this->assertNotNull($body);
@@ -160,6 +168,6 @@ final class EmbedTest extends ClientTestCase
         $this->transport->respond('POST', '/v1/embeddings', $fixture['response']);
         $this->expectException(ResponseException::class);
         $this->expectExceptionMessage('no embedding data');
-        $this->client()->embed('text');
+        $this->client()->embed('text')->output();
     }
 }
