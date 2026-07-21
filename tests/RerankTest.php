@@ -24,7 +24,7 @@ final class RerankTest extends ClientTestCase
     public function testResultsSortedByRelevance(): void
     {
         $this->transport->register('rerank');
-        $results = $this->client()->rerank(self::QUERY, self::DOCUMENTS);
+        $results = $this->client()->rerank(self::QUERY, self::DOCUMENTS)->output();
         $this->assertCount(count(self::DOCUMENTS), $results);
         $this->assertContainsOnlyInstancesOf(RerankResult::class, $results);
 
@@ -39,6 +39,14 @@ final class RerankTest extends ClientTestCase
         foreach ($results as $result) {
             $this->assertSame(self::DOCUMENTS[$result->index], $result->document->text);
         }
+    }
+
+    public function testUsageReportsInputTokens(): void
+    {
+        $fixture = $this->transport->register('rerank');
+        $usage = $this->client()->rerank(self::QUERY, self::DOCUMENTS)->usage();
+        $this->assertSame($fixture['response']['usage']['prompt_tokens'], $usage->inputTokens);
+        $this->assertSame(0, $usage->outputTokens);
     }
 
     public function testMinimalRequestBody(): void
@@ -57,7 +65,7 @@ final class RerankTest extends ClientTestCase
     public function testTopNLimitsResults(): void
     {
         $this->transport->register('rerank_top_n');
-        $results = $this->client()->rerank(self::QUERY, self::DOCUMENTS, 'Qwen/Qwen3-VL-Reranker-8B', 2);
+        $results = $this->client()->rerank(self::QUERY, self::DOCUMENTS, 'Qwen/Qwen3-VL-Reranker-8B', 2)->output();
         $this->assertCount(2, $results);
         $body = $this->transport->lastCall()->body;
         $this->assertNotNull($body);

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-07-21
+
+### Changed
+
+- **Breaking:** `embed()` and `batchEmbed()` now return the full `EmbeddingResponse` instead of bare vectors. Get the vectors via `output()` (one per input, so `output()[0]` for `embed()`), and token usage via `usage()` - previously usage on embedding calls was unrecoverable.
+- **Breaking:** `rerank()` now returns the full `RerankResponse` instead of a `RerankResult[]` array. Get the sorted results via `output()` (or the `$results` property), and token usage via `usage()`.
+- **Breaking:** `EmbeddingResponse::output()` now returns validated float vectors and throws `SthAI\Exception\ResponseException` for non-float encoding formats or when the response carries no embeddings. The raw entries stay available on the `$data` property.
+
 ## [1.1.1] - 2026-07-20
 
 ### Added
@@ -45,6 +53,7 @@ Initial release: a PHP port of [sthai-py](https://github.com/sitehostnz/sthai-py
 - `models()`, `healthy()`, session pinning (explicit or auto-generated) and `SthAI\Image` data-URI helpers
 - Offline test suite replaying fixtures captured from the live API, shared with sthai-py
 
+[1.2.0]: https://github.com/sitehostnz/sthai-php/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/sitehostnz/sthai-php/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/sitehostnz/sthai-php/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/sitehostnz/sthai-php/compare/v0.1.0...v1.0.0

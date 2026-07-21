@@ -467,7 +467,9 @@ final class Client
     }
 
     /**
-     * Embed a single input (text, images, or both) and return its vector.
+     * Embed a single input (text, images, or both) and return the full
+     * embedding response; output()[0] is the resulting vector, and
+     * usage() reports the token counts.
      *
      * The instruction-trained model is steered by a default instruction
      * from EmbeddingParams: the model's document instruction, or its query
@@ -481,8 +483,6 @@ final class Client
      *
      * @param string[] $imageUrls  image URLs (or data URIs, e.g. from Image::dataUriFromBytes())
      * @param string[] $imageFiles paths of local image files, inlined as data URIs
-     *
-     * @return array<int, float|int> the embedding vector
      */
     public function embed(
         ?string $text = null,
@@ -492,7 +492,7 @@ final class Client
         array $imageUrls = [],
         array $imageFiles = [],
         ?int $dimensions = null
-    ): array {
+    ): EmbeddingResponse {
         $imageParts = self::buildImageParts($imageUrls, $imageFiles);
         $parts = [];
         // An empty string is treated as no text: embedding it would produce
@@ -521,7 +521,7 @@ final class Client
         // trained to embed
         $messages[] = ['role' => 'assistant', 'content' => ''];
 
-        $decoded = $this->embeddingRequest([
+        return $this->embeddingRequest([
             'messages' => $messages,
             'model' => $model,
             'encoding_format' => 'float',
@@ -531,17 +531,13 @@ final class Client
             // matches batchEmbed's plain-input form, which defaults to true
             'add_special_tokens' => true,
         ]);
-        $outputs = $decoded->output();
-        if ($outputs === []) {
-            throw new ResponseException('server returned no embedding data');
-        }
-
-        return self::floatEmbedding($outputs[0]);
     }
 
     /**
-     * Embed a batch of texts in one request, returning one vector per text
-     * in the same order. Text-only; use embed() for multimodal input.
+     * Embed a batch of texts in one request and return the full embedding
+     * response; output() is one vector per text in the same order, and
+     * usage() reports the token counts. Text-only; use embed() for
+     * multimodal input.
      *
      * Only the plain-input request form batches, and it bypasses the
      * server-side chat template, so each text is rendered through a local
@@ -553,8 +549,6 @@ final class Client
      * untemplated input. dimensions truncates the vectors server-side.
      *
      * @param string[] $texts
-     *
-     * @return array<int, array<int, float|int>> one vector per text, in input order
      */
     public function batchEmbed(
         array $texts,
@@ -563,7 +557,7 @@ final class Client
         ?string $instruction = null,
         ?string $template = null,
         ?int $dimensions = null
-    ): array {
+    ): EmbeddingResponse {
         if ($texts === []) {
             throw new InputException('batchEmbed() requires at least one text');
         }
@@ -607,19 +601,12 @@ final class Client
             $inputs[] = Template::render($template, $instruction, $text);
         }
 
-        $decoded = $this->embeddingRequest([
+        return $this->embeddingRequest([
             'input' => $inputs,
             'model' => $model,
             'encoding_format' => 'float',
             'dimensions' => $dimensions,
         ]);
-
-        $vectors = [];
-        foreach ($decoded->output() as $embedding) {
-            $vectors[] = self::floatEmbedding($embedding);
-        }
-
-        return $vectors;
     }
 
     /**
@@ -685,23 +672,6 @@ final class Client
                 E_USER_WARNING
             );
         }
-    }
-
-    /**
-     * Ensure a decoded embedding is the float list the client requested
-     * (the server returns strings for non-float encoding formats).
-     *
-     * @param array<int, float|int>|string $embedding
-     *
-     * @return array<int, float|int>
-     */
-    private static function floatEmbedding($embedding): array
-    {
-        if (is_string($embedding)) {
-            throw new ResponseException('expected a float embedding, got an encoded string');
-        }
-
-        return $embedding;
     }
 
     /**
@@ -786,9 +756,11 @@ final class Client
     }
 
     /**
-     * Score each document against the query and return the results sorted
-     * by relevance score descending, each carrying the document, its
-     * relevanceScore, and its index in the input documents list.
+     * Score each document against the query and return the full rerank
+     * response. Its output() method is the results sorted by relevance
+     * score descending - each carrying the document, its relevanceScore,
+     * and its index in the input documents list - and usage() reports the
+     * token counts.
      *
      * All documents are returned unless topN limits it. The
      * instruction-trained model applies its own default instruction; pass
@@ -799,8 +771,6 @@ final class Client
      *
      * @param string|array<string, mixed>              $query
      * @param array<int, string|array<string, mixed>>  $documents
-     *
-     * @return \SthAI\Response\RerankResult[]
      */
     public function rerank(
         $query,
@@ -808,7 +778,7 @@ final class Client
         string $model = RerankingModel::QWEN_3_VL_8B,
         ?int $topN = null,
         ?string $instruction = null
-    ): array {
+    ): RerankResponse {
         if ($documents === []) {
             throw new InputException('rerank() requires at least one document');
         }
@@ -816,15 +786,13 @@ final class Client
             throw new InputException('topN must be a positive integer');
         }
 
-        $decoded = RerankResponse::fromArray($this->requestJson('POST', self::RERANKING_ENDPOINT, [
+        return RerankResponse::fromArray($this->requestJson('POST', self::RERANKING_ENDPOINT, [
             'query' => $query,
             'documents' => array_values($documents),
             'top_n' => $topN,
             'model' => $model,
             'instruction' => $instruction,
         ]));
-
-        return $decoded->results;
     }
 
     /**

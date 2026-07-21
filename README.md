@@ -110,29 +110,29 @@ The client does not re-validate the result against the schema. If the output is 
 
 ### Embeddings
 
-`embed()` turns one input - text, images, or both - into a single vector. The embedding model is instruction-trained: document embedding is the default, and `query: true` switches to the query instruction for search-style lookups. `dimensions` truncates the vector server-side (Matryoshka - powers of two work best):
+`embed()` turns one input - text, images, or both - into a single vector, the sole entry in the response's `output()`. The embedding model is instruction-trained: document embedding is the default, and `query: true` switches to the query instruction for search-style lookups. `dimensions` truncates the vector server-side (Matryoshka - powers of two work best):
 
 ```php
-$vector = $client->embed("The Beehive is New Zealand's parliament building.");
-$queryVector = $client->embed('Where does NZ parliament sit?', query: true);
-$small = $client->embed('Compact vector, please.', dimensions: 512);
+$vector = $client->embed("The Beehive is New Zealand's parliament building.")->output()[0];
+$queryVector = $client->embed('Where does NZ parliament sit?', query: true)->output()[0];
+$small = $client->embed('Compact vector, please.', dimensions: 512)->output()[0];
 ```
 
-`batchEmbed()` embeds many texts in one request, returning one vector per text in order:
+`batchEmbed()` embeds many texts in one request; the response's `output()` is one vector per text in order:
 
 ```php
 $vectors = $client->batchEmbed([
     'Wellington is the capital of New Zealand.',
     'Auckland is the largest city in New Zealand.',
-]);
+])->output();
 ```
 
 ### Reranking
 
-`rerank()` scores each document against a query and returns results sorted by relevance, with each result's `index` mapping back to your input list:
+`rerank()` scores each document against a query; `output()` on the response is the results sorted by relevance, with each result's `index` mapping back to your input list:
 
 ```php
-$results = $client->rerank(
+$response = $client->rerank(
     'What is the capital of New Zealand?',
     [
         'The capital of New Zealand is Wellington.',
@@ -141,7 +141,7 @@ $results = $client->rerank(
     ],
     topN: 2,
 );
-foreach ($results as $result) {
+foreach ($response->output() as $result) {
     echo $result->relevanceScore, ' ', $result->document->text, PHP_EOL;
 }
 ```
@@ -150,12 +150,21 @@ Pass `instruction:` to steer relevance for a specific task; the model applies a 
 
 ### Response helpers
 
-Every response type has `usage()` (input/output/cached token counts) and `output()` (the useful payload), and `toArray()` exposes the complete decoded payload. The full response from the most recent inference call is available via `lastResponse()`:
+Every inference, embedding and rerank call returns the full response object, and every response object has `usage()` (input/output/cached token counts) and `output()` (the useful payload), with `toArray()` exposing the complete decoded payload:
 
 ```php
 $response = $client->chat('Hello!');
 echo $response->usage()->inputTokens, ' ', $response->usage()->outputTokens;
-echo $client->lastResponse()->model;
+
+$embedded = $client->embed('Hello!');
+echo $embedded->usage()->inputTokens, ' ', count($embedded->output()[0]);
+```
+
+The one exception is `structuredResponse()`, which returns the decoded array directly; the full response from the most recent inference call remains available via `lastResponse()`:
+
+```php
+$city = $client->structuredResponse('Describe Wellington.', $citySchema);
+echo $client->lastResponse()->usage()->inputTokens;
 ```
 
 ### Sessions

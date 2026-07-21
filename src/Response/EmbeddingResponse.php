@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SthAI\Response;
 
+use SthAI\Exception\ResponseException;
+
 /**
  * The full response from an embedding request.
  */
@@ -60,12 +62,18 @@ final class EmbeddingResponse
     }
 
     /**
-     * The embeddings in input order (base64/binary formats are strings).
+     * The embeddings in input order as float vectors. Throws
+     * ResponseException when the response carries no embeddings, or for
+     * non-float encoding formats (where the server returns strings; the
+     * raw entries stay available on data).
      *
-     * @return array<int, array<int, float|int>|string>
+     * @return array<int, array<int, float|int>>
      */
     public function output(): array
     {
+        if ($this->data === []) {
+            throw new ResponseException('server returned no embedding data');
+        }
         $sorted = $this->data;
         usort($sorted, static function (EmbeddingData $a, EmbeddingData $b): int {
             return $a->index <=> $b->index;
@@ -73,6 +81,9 @@ final class EmbeddingResponse
 
         $embeddings = [];
         foreach ($sorted as $entry) {
+            if (is_string($entry->embedding)) {
+                throw new ResponseException('expected a float embedding, got an encoded string');
+            }
             $embeddings[] = $entry->embedding;
         }
 

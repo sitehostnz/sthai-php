@@ -32,12 +32,20 @@ final class BatchEmbedTest extends ClientTestCase
             null,
             null,
             32
-        );
+        )->output();
         $expected = array_column($fixture['response']['data'], 'embedding');
         $this->assertSame($expected, $vectors);
         foreach ($vectors as $vector) {
             $this->assertCount(32, $vector);
         }
+    }
+
+    public function testUsageReportsTokenCounts(): void
+    {
+        $fixture = $this->transport->register('batch_embed');
+        $usage = $this->client()->batchEmbed(self::TEXTS)->usage();
+        $this->assertSame($fixture['response']['usage']['prompt_tokens'], $usage->inputTokens);
+        $this->assertSame(0, $usage->outputTokens);
     }
 
     public function testOutOfOrderResponseResortedByIndex(): void
@@ -47,7 +55,7 @@ final class BatchEmbedTest extends ClientTestCase
         $fixture['response']['data'] = [$byIndex[2], $byIndex[0], $byIndex[1]];
         $this->transport->respond('POST', '/v1/embeddings', $fixture['response']);
 
-        $vectors = $this->client()->batchEmbed(self::TEXTS);
+        $vectors = $this->client()->batchEmbed(self::TEXTS)->output();
         $this->assertSame(
             [$byIndex[0]['embedding'], $byIndex[1]['embedding'], $byIndex[2]['embedding']],
             $vectors
