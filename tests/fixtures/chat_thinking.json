@@ -9,17 +9,17 @@
         "content": "What is 17 + 25? Answer with just the number."
       }
     ],
-    "model": "Qwen/Qwen3.6-27B",
+    "model": "Qwen/Qwen3.8-27B",
     "max_completion_tokens": 400,
     "chat_template_kwargs": {
       "enable_thinking": true
     }
   },
   "response": {
-    "id": "chatcmpl-sthai-91aa36382afa96d2250c1cfda36f7dc3",
+    "id": "chatcmpl-sthai-d1af76cae11219f0b9fb588df14b380c",
     "object": "chat.completion",
-    "created": 1784355466,
-    "model": "Qwen/Qwen3.6-27B",
+    "created": 1791322515,
+    "model": "Qwen/Qwen3.8-27B",
     "choices": [
       {
         "index": 0,
@@ -30,8 +30,7 @@
           "annotations": null,
           "audio": null,
           "function_call": null,
-          "tool_calls": [],
-          "reasoning": "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - Question: \"What is 17 + 25?\"\n   - Constraint: \"Answer with just the number.\"\n\n2.  **Perform Calculation:**\n   - 17 + 25 = 42\n\n3.  **Check Constraints:**\n   - Must answer in English (default, but this is just a number so language doesn't apply much)\n   - Must answer with *just* the number.\n\n4.  **Format Output:**\n   - Just \"42\"\n\n5.  **Final Verification:**\n   - Calculation is correct.\n   - Constraint met (only the number).\n   - Language constraint met (implicitly).\n\n   Output: 42\u2705\n"
+          "reasoning": "The user is asking a simple math question: 17 + 25. They want just the number as the answer.\n\n17 + 25 = 42\n"
         },
         "logprobs": null,
         "finish_reason": "stop",
@@ -43,14 +42,20 @@
     "service_tier": null,
     "system_fingerprint": "c03-infer-b",
     "usage": {
-      "prompt_tokens": 50,
-      "total_tokens": 223,
-      "completion_tokens": 173,
-      "prompt_tokens_details": null
+      "prompt_tokens": 88,
+      "total_tokens": 131,
+      "completion_tokens": 43,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "created_cache_tokens": 0,
+        "multimodal_tokens": null
+      }
     },
     "prompt_logprobs": null,
     "prompt_token_ids": null,
     "prompt_text": null,
-    "kv_transfer_params": null
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
   }
 }

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-10-07
+
+### Added
+
+- `InferenceModel::QWEN_3_8_27B` for Qwen 3.8 27B (`Qwen/Qwen3.8-27B`).
+
+### Changed
+
+- The default inference model for `chat()`, `response()` and `structuredResponse()` is now Qwen 3.8 27B.
+
+### Deprecated
+
+- `InferenceModel::QWEN_3_6_27B` (`Qwen/Qwen3.6-27B`) is deprecated in favour of Qwen 3.8. The platform still accepts it as an alias, but `models()` no longer lists it. See the [models page](https://kb.sitehost.nz/ai-platform/models) for its retirement timeline.
+
 ## [1.2.0] - 2026-07-21
 
 ### Changed
@@ -53,6 +67,7 @@ Initial release: a PHP port of [sthai-py](https://github.com/sitehostnz/sthai-py
 - `models()`, `healthy()`, session pinning (explicit or auto-generated) and `SthAI\Image` data-URI helpers
 - Offline test suite replaying fixtures captured from the live API, shared with sthai-py
 
+[1.3.0]: https://github.com/sitehostnz/sthai-php/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/sitehostnz/sthai-php/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/sitehostnz/sthai-php/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/sitehostnz/sthai-php/compare/v1.0.0...v1.1.0

@@ -38,7 +38,7 @@ final class ChatTest extends ClientTestCase
     {
         $this->transport->register('chat_thinking');
         $client = $this->client();
-        $response = $client->chat('What is 17 + 25?', 'Qwen/Qwen3.6-27B', null, null, true);
+        $response = $client->chat('What is 17 + 25?', 'Qwen/Qwen3.8-27B', null, null, true);
         $this->assertNotNull($response->output()->reasoning);
         $this->assertNotSame('', $response->output()->reasoning);
         $this->assertSame($response->output()->reasoning, $client->lastReasoning());
@@ -68,7 +68,7 @@ final class ChatTest extends ClientTestCase
     public function testOptionalParamsOnTheWire(): void
     {
         $this->transport->register('chat_simple');
-        $this->client()->chat('hello', 'Qwen/Qwen3.6-27B', 50, 0.2, true);
+        $this->client()->chat('hello', 'Qwen/Qwen3.8-27B', 50, 0.2, true);
         $body = $this->transport->lastCall()->body;
         $this->assertNotNull($body);
         // maxTokens maps to the non-deprecated max_completion_tokens field
@@ -83,7 +83,7 @@ final class ChatTest extends ClientTestCase
         $this->transport->register('chat_simple');
         $this->client()->chat(
             "What's in this image?",
-            'Qwen/Qwen3.6-27B',
+            'Qwen/Qwen3.8-27B',
             null,
             null,
             false,
@@ -123,7 +123,7 @@ final class ChatTest extends ClientTestCase
         $this->transport->register('chat_simple');
         $client = $this->client();
         $client->chat('first');
-        $client->chat('standalone', 'Qwen/Qwen3.6-27B', null, null, false, null, [], [], false);
+        $client->chat('standalone', 'Qwen/Qwen3.8-27B', null, null, false, null, [], [], false);
         $body = $this->transport->lastCall()->body;
         $this->assertNotNull($body);
         $this->assertSame(['user'], array_column($body['messages'], 'role'));
@@ -156,7 +156,7 @@ final class ChatTest extends ClientTestCase
     {
         $this->transport->register('chat_simple');
         $client = $this->client();
-        $client->chat('first', 'Qwen/Qwen3.6-27B', null, null, false, 'Be terse.');
+        $client->chat('first', 'Qwen/Qwen3.8-27B', null, null, false, 'Be terse.');
         $body = $this->transport->lastCall()->body;
         $this->assertNotNull($body);
         $this->assertSame(['role' => 'system', 'content' => 'Be terse.'], $body['messages'][0]);
@@ -247,7 +247,7 @@ final class ChatTest extends ClientTestCase
     {
         $this->transport->register('chat_simple');
         $client = $this->client();
-        $client->chat('standalone', 'Qwen/Qwen3.6-27B', null, null, false, null, [], [], false);
+        $client->chat('standalone', 'Qwen/Qwen3.8-27B', null, null, false, null, [], [], false);
         $this->assertSame(0, $client->historyUsage()->inputTokens);
     }
 

@@ -242,7 +242,7 @@ final class Client
      */
     public function chat(
         string $prompt,
-        string $model = InferenceModel::QWEN_3_6_27B,
+        string $model = InferenceModel::QWEN_3_8_27B,
         ?int $maxTokens = null,
         ?float $temperature = null,
         bool $useThinking = false,
@@ -300,7 +300,7 @@ final class Client
      */
     public function response(
         string $prompt,
-        string $model = InferenceModel::QWEN_3_6_27B,
+        string $model = InferenceModel::QWEN_3_8_27B,
         ?int $maxTokens = null,
         ?float $temperature = null,
         bool $useThinking = false,
@@ -349,7 +349,7 @@ final class Client
         string $prompt,
         ?array $schema = null,
         string $schemaName = 'response',
-        string $model = InferenceModel::QWEN_3_6_27B,
+        string $model = InferenceModel::QWEN_3_8_27B,
         ?int $maxTokens = null,
         ?float $temperature = null,
         bool $useThinking = false,

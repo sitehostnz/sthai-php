@@ -14,9 +14,11 @@ The platform currently serves three models, one per capability (see the [models 
 
 | Model | Purpose | Context window |
 |-------|---------|----------------|
-| `Qwen/Qwen3.6-27B` | Inference (chat, multimodal, thinking) | 262K |
+| `Qwen/Qwen3.8-27B` | Inference (chat, multimodal, thinking) | 262K |
 | `Qwen/Qwen3-VL-Embedding-8B` | Embeddings (multimodal, Matryoshka, 4096 dims) | 32K |
 | `Qwen/Qwen3-VL-Reranker-8B` | Reranking (multimodal, instruction-trained) | 32K |
+
+Qwen 3.6 27B (`Qwen/Qwen3.6-27B`) is deprecated, and Qwen 3.8 27B replaces it as the default inference model. The platform still accepts `Qwen/Qwen3.6-27B` as an alias, but `models()` no longer lists it. `InferenceModel::QWEN_3_6_27B` stays available until the alias is retired - see the [models page](https://kb.sitehost.nz/ai-platform/models) for the timeline.
 
 ## Installation
 
