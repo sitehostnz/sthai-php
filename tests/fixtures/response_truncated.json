@@ -9,7 +9,7 @@
         "content": "Give me basic facts about Wellington, New Zealand."
       }
     ],
-    "model": "Qwen/Qwen3.6-27B",
+    "model": "Qwen/Qwen3.8-27B",
     "max_completion_tokens": 10,
     "response_format": {
       "type": "json_schema",
@@ -48,10 +48,10 @@
     }
   },
   "response": {
-    "id": "chatcmpl-sthai-f25bc580e976db81551d5f12e2f14693",
+    "id": "chatcmpl-sthai-8de998c82a706ecefb8280f9f774ce38",
     "object": "chat.completion",
-    "created": 1784355469,
-    "model": "Qwen/Qwen3.6-27B",
+    "created": 1791322519,
+    "model": "Qwen/Qwen3.8-27B",
     "choices": [
       {
         "index": 0,
@@ -62,7 +62,6 @@
           "annotations": null,
           "audio": null,
           "function_call": null,
-          "tool_calls": [],
           "reasoning": null
         },
         "logprobs": null,
@@ -73,16 +72,22 @@
       }
     ],
     "service_tier": null,
-    "system_fingerprint": "c03-infer-a",
+    "system_fingerprint": "c03-infer-b",
     "usage": {
       "prompt_tokens": 46,
       "total_tokens": 56,
       "completion_tokens": 10,
-      "prompt_tokens_details": null
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "created_cache_tokens": 0,
+        "multimodal_tokens": null
+      }
     },
     "prompt_logprobs": null,
     "prompt_token_ids": null,
     "prompt_text": null,
-    "kv_transfer_params": null
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
   }
 }

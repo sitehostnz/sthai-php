@@ -9,7 +9,7 @@
         "content": "Return a JSON object with a single key \"answer\" whose value is 42."
       }
     ],
-    "model": "Qwen/Qwen3.6-27B",
+    "model": "Qwen/Qwen3.8-27B",
     "max_completion_tokens": 100,
     "response_format": {
       "type": "json_object"
@@ -19,10 +19,10 @@
     }
   },
   "response": {
-    "id": "chatcmpl-sthai-ae235bf303878a5b0e8fc1209e0b15b8",
+    "id": "chatcmpl-sthai-cfb0e7d431df4980a7aa5342cfb71c9c",
     "object": "chat.completion",
-    "created": 1784355468,
-    "model": "Qwen/Qwen3.6-27B",
+    "created": 1791322518,
+    "model": "Qwen/Qwen3.8-27B",
     "choices": [
       {
         "index": 0,
@@ -33,7 +33,6 @@
           "annotations": null,
           "audio": null,
           "function_call": null,
-          "tool_calls": [],
           "reasoning": null
         },
         "logprobs": null,
@@ -49,11 +48,17 @@
       "prompt_tokens": 54,
       "total_tokens": 66,
       "completion_tokens": 12,
-      "prompt_tokens_details": null
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "created_cache_tokens": 0,
+        "multimodal_tokens": null
+      }
     },
     "prompt_logprobs": null,
     "prompt_token_ids": null,
     "prompt_text": null,
-    "kv_transfer_params": null
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
   }
 }

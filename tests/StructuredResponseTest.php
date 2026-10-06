@@ -77,7 +77,7 @@ final class StructuredResponseTest extends ClientTestCase
         $content = $fixture['response']['choices'][0]['message']['content'];
         $this->assertSame(json_decode($content, true), $result);
         $this->assertSame('Wellington', $result['name']);
-        $this->assertSame(215400, $result['population']);
+        $this->assertIsInt($result['population']);
 
         $body = $this->transport->lastCall()->body;
         $this->assertNotNull($body);
@@ -108,7 +108,7 @@ final class StructuredResponseTest extends ClientTestCase
             'facts please',
             self::CITY_INFO_SCHEMA,
             'CityInfo',
-            'Qwen/Qwen3.6-27B',
+            'Qwen/Qwen3.8-27B',
             10
         );
     }

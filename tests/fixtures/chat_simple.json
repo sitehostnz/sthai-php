@@ -9,17 +9,17 @@
         "content": "Reply with exactly: kia ora"
       }
     ],
-    "model": "Qwen/Qwen3.6-27B",
+    "model": "Qwen/Qwen3.8-27B",
     "max_completion_tokens": 50,
     "chat_template_kwargs": {
       "enable_thinking": false
     }
   },
   "response": {
-    "id": "chatcmpl-sthai-2a2e34be9d8e57b9bbc83d19b37a9a3d",
+    "id": "chatcmpl-sthai-9dfbc0652bc011e64f2bedde98938770",
     "object": "chat.completion",
-    "created": 1784355466,
-    "model": "Qwen/Qwen3.6-27B",
+    "created": 1791322515,
+    "model": "Qwen/Qwen3.8-27B",
     "choices": [
       {
         "index": 0,
@@ -30,7 +30,6 @@
           "annotations": null,
           "audio": null,
           "function_call": null,
-          "tool_calls": [],
           "reasoning": null
         },
         "logprobs": null,
@@ -41,16 +40,22 @@
       }
     ],
     "service_tier": null,
-    "system_fingerprint": "c03-infer-a",
+    "system_fingerprint": "c03-infer-b",
     "usage": {
       "prompt_tokens": 42,
       "total_tokens": 45,
       "completion_tokens": 3,
-      "prompt_tokens_details": null
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "created_cache_tokens": 0,
+        "multimodal_tokens": null
+      }
     },
     "prompt_logprobs": null,
     "prompt_token_ids": null,
     "prompt_text": null,
-    "kv_transfer_params": null
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
   }
 }

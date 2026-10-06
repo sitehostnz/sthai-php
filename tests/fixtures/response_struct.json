@@ -9,7 +9,7 @@
         "content": "Give me basic facts about Wellington, New Zealand."
       }
     ],
-    "model": "Qwen/Qwen3.6-27B",
+    "model": "Qwen/Qwen3.8-27B",
     "max_completion_tokens": 200,
     "response_format": {
       "type": "json_schema",
@@ -48,21 +48,20 @@
     }
   },
   "response": {
-    "id": "chatcmpl-sthai-e21b6ae6aaf350b789b1f9c5ce612ba9",
+    "id": "chatcmpl-sthai-4855838401b4000663e074fbb7ccae0f",
     "object": "chat.completion",
-    "created": 1784355468,
-    "model": "Qwen/Qwen3.6-27B",
+    "created": 1791322516,
+    "model": "Qwen/Qwen3.8-27B",
     "choices": [
       {
         "index": 0,
         "message": {
           "role": "assistant",
-          "content": "{\n  \"name\": \"Wellington\",\n  \"country\": \"New Zealand\",\n  \"population\": 215400\n}",
+          "content": "{\n  \"name\": \"Wellington\",\n  \"country\": \"New Zealand\",\n  \"population\": 422266\n}",
           "refusal": null,
           "annotations": null,
           "audio": null,
           "function_call": null,
-          "tool_calls": [],
           "reasoning": null
         },
         "logprobs": null,
@@ -73,16 +72,22 @@
       }
     ],
     "service_tier": null,
-    "system_fingerprint": "c03-infer-a",
+    "system_fingerprint": "c03-infer-b",
     "usage": {
       "prompt_tokens": 46,
       "total_tokens": 80,
       "completion_tokens": 34,
-      "prompt_tokens_details": null
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "created_cache_tokens": 0,
+        "multimodal_tokens": null
+      }
     },
     "prompt_logprobs": null,
     "prompt_token_ids": null,
     "prompt_text": null,
-    "kv_transfer_params": null
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
   }
 }

@@ -157,12 +157,12 @@ final class ResponseHydrationTest extends TestCase
     public function testModelCardHydration(): void
     {
         $card = ModelCard::fromArray([
-            'id' => 'Qwen/Qwen3.6-27B',
+            'id' => 'Qwen/Qwen3.8-27B',
             'object' => 'model',
             'created' => 1783894642,
             'owned_by' => 'sitehost',
         ]);
-        $this->assertSame('Qwen/Qwen3.6-27B', $card->id);
+        $this->assertSame('Qwen/Qwen3.8-27B', $card->id);
         $this->assertSame('sitehost', $card->ownedBy);
         $this->assertNull($card->maxModelLen);
         $this->assertSame('model', $card->toArray()['object']);
